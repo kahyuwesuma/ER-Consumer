@@ -1,9 +1,8 @@
 {
-    "functions": {
-        "app.js": {
-            "memory": 1769,
-            "maxDuration": 60,
-            "includeFiles": "src/views/**"
-        }
+  "functions": {
+    "app.js": {
+      "maxDuration": 300,
+      "includeFiles": "src/views/**"
     }
+  }
 }
