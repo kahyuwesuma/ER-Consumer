@@ -1,6 +1,7 @@
 const puppeteer = require('puppeteer');
 const ejs = require('ejs');
 const path = require('path');
+const chromium = require('@sparticuz/chromium');
 
 class PdfBuilder {
   static async createPDF(templateName, data) {
@@ -9,8 +10,10 @@ class PdfBuilder {
     const html = await ejs.renderFile(templatePath, data);
 
     const browser = await puppeteer.launch({
-      headless: 'new',
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath(),
+      headless: chromium.headless,
     });
 
     const page = await browser.newPage();
