@@ -1,30 +1,57 @@
-const puppeteer = require('puppeteer-core');
+const fs = require('fs');
 const ejs = require('ejs');
 const path = require('path');
+const puppeteer = require('puppeteer-core');
 
+// Versi pack HARUS sama dengan versi paket @sparticuz/chromium-min yang terpasang
 const CHROMIUM_PACK_URL =
   process.env.CHROMIUM_PACK_URL ||
   'https://github.com/Sparticuz/chromium/releases/download/v153.0.0/chromium-v153.0.0-pack.x64.tar';
+
+// Lokasi Chrome/Edge untuk pengembangan lokal (bisa diatur lewat env CHROME_PATH)
+const LOCAL_CHROME_PATHS = [
+  process.env.CHROME_PATH,
+  'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+  'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+  'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+  '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+  '/usr/bin/google-chrome',
+  '/usr/bin/chromium',
+  '/usr/bin/chromium-browser',
+].filter(Boolean);
+
+async function launchBrowser() {
+  if (process.env.VERCEL) {
+    // import() dinamis: paket ESM-only tidak bisa di-require dari CommonJS
+    const { default: chromium } = await import('@sparticuz/chromium-min');
+    return puppeteer.launch({
+      args: chromium.args,
+      executablePath: await chromium.executablePath(CHROMIUM_PACK_URL),
+      headless: 'shell',
+    });
+  }
+
+  const executablePath = LOCAL_CHROME_PATHS.find((p) => fs.existsSync(p));
+  if (!executablePath) {
+    throw new Error('Chrome/Edge tidak ditemukan. Set env CHROME_PATH ke lokasi chrome.exe.');
+  }
+  return puppeteer.launch({ executablePath, headless: true });
+}
 
 class PdfBuilder {
   static async createPDF(templateName, data) {
     const templatePath = path.join(__dirname, '../views/templates', `${templateName}.ejs`);
     const html = await ejs.renderFile(templatePath, data);
 
-    const { default: chromium } = await import('@sparticuz/chromium-min');
-
     let browser;
     try {
-      browser = await puppeteer.launch({
-        args: chromium.args,
-        executablePath: await chromium.executablePath(CHROMIUM_PACK_URL),
-        headless: 'shell',
-      });
+      browser = await launchBrowser();
 
       const page = await browser.newPage();
-      await page.setContent(html, { waitUntil: 'networkidle0' });
+      // Semua aset sudah inline (foto base64), jadi tidak perlu menunggu jaringan idle
+      await page.setContent(html, { waitUntil: 'load' });
 
-      return await page.pdf({
+      const pdf = await page.pdf({
         format: 'A4',
         printBackground: true,
         margin: { top: '25mm', right: '20mm', bottom: '25mm', left: '20mm' },
@@ -39,6 +66,8 @@ class PdfBuilder {
             <div>Halaman <span class="pageNumber"></span> dari <span class="totalPages"></span></div>
           </div>`,
       });
+
+      return Buffer.from(pdf); // Puppeteer baru mengembalikan Uint8Array; Express butuh Buffer
     } finally {
       if (browser) await browser.close();
     }
