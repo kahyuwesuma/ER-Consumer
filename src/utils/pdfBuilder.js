@@ -1,7 +1,6 @@
 const fs = require('fs');
 const ejs = require('ejs');
 const path = require('path');
-const puppeteer = require('puppeteer-core');
 
 // Versi pack HARUS sama dengan versi paket @sparticuz/chromium-min yang terpasang
 const CHROMIUM_PACK_URL =
@@ -21,8 +20,11 @@ const LOCAL_CHROME_PATHS = [
 ].filter(Boolean);
 
 async function launchBrowser() {
+  // Paket ESM-only: hanya boleh dimuat dengan import() dinamis, di dalam fungsi
+  const pptr = await import('puppeteer-core');
+  const puppeteer = pptr.default ?? pptr;
+
   if (process.env.VERCEL) {
-    // import() dinamis: paket ESM-only tidak bisa di-require dari CommonJS
     const { default: chromium } = await import('@sparticuz/chromium-min');
     return puppeteer.launch({
       args: chromium.args,
