@@ -1,0 +1,8 @@
+{
+    "functions": {
+        "app.js": {
+            "memory": 1769,
+            "maxDuration": 60
+        }
+    }
+}
