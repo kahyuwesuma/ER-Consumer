@@ -3,19 +3,19 @@
   "version": "6.0.0",
   "description": "EarthRanger Web Report Generator MVC",
   "main": "app.js",
+  "engines": { "node": "22.x" },
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon -e js,ejs,html,css app.js"
   },
   "dependencies": {
-    "@sparticuz/chromium": "^153.0.0",
+    "@sparticuz/chromium-min": "153.0.0",
     "axios": "^1.6.8",
     "cookie-parser": "^1.4.6",
     "dayjs": "^1.11.10",
     "ejs": "^3.1.9",
     "express": "^4.19.2",
-    "puppeteer": "^22.6.0",
-    "puppeteer-core": "^25.16.0"
+    "puppeteer-core": "25.16.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
