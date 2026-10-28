@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <title>EarthRanger Patrol Report</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 15mm 20mm; /* Margin kiri-kanan sedikit lebih lebar agar elegan */
+    }
+
+    :root {
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --accent: #059669; /* Emerald green */
+      --accent-light: #ecfdf5;
+      --solo: #6366f1; /* Indigo untuk standalone */
+      --solo-light: #eef2ff;
+    }
+
+    body {
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: var(--text-main);
+      margin: 0;
+      padding: 0;
+      font-size: 9pt;
+      line-height: 1.5;
+      background: #ffffff;
+    }
+
+    .page-break { page-break-before: always; }
+    .no-break { page-break-inside: avoid; }
+
+    /* --- 1. COVER PAGE --- */
+    .cover-container {
+      height: 85vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 20px 0;
+    }
+    
+    .cover-brand-line {
+      width: 48px;
+      height: 4px;
+      background-color: var(--accent);
+      margin-bottom: 24px;
+    }
+
+    .cover-title {
+      font-size: 32pt;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #0f172a;
+      margin: 0 0 8px 0;
+      line-height: 1.1;
+    }
+
+    .cover-subtitle {
+      font-size: 16pt;
+      color: var(--text-muted);
+      font-weight: 400;
+      margin-bottom: 48px;
+    }
+
+    .cover-meta {
+      margin-top: auto; /* Mendorong info ke bawah */
+      border-top: 1px solid var(--border-color);
+      padding-top: 24px;
+      font-size: 10pt;
+      color: var(--text-main);
+      line-height: 1.8;
+    }
+
+    .cover-meta strong { color: #0f172a; display: inline-block; width: 100px; }
+    
+    .confidential-badge {
+      display: inline-block;
+      margin-top: 24px;
+      padding: 6px 12px;
+      background-color: #fef2f2;
+      color: #b91c1c;
+      font-size: 8pt;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      border-radius: 4px;
+      border: 1px solid #fecaca;
+    }
+
+    /* --- 2. TYPOGRAPHY & LAYOUT --- */
+    h1.section-title {
+      font-size: 16pt;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0 0 16px 0;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    h2.subsection-title {
+      font-size: 11pt;
+      font-weight: 600;
+      color: var(--text-main);
+      margin: 24px 0 12px 0;
+    }
+
+    .alert-box {
+      background-color: #f8fafc;
+      border-left: 3px solid var(--text-muted);
+      padding: 8px 12px;
+      font-size: 8.5pt;
+      color: var(--text-main);
+      margin-bottom: 16px;
+      border-radius: 0 4px 4px 0;
+    }
+
+    /* --- 3. STAT CARDS --- */
+    .stat-grid {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background: #ffffff;
+    }
+    .stat-number {
+      font-size: 18pt;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .stat-label {
+      font-size: 7.5pt;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+    .stat-card.accent { border-top: 3px solid var(--accent); }
+    .stat-card.solo { border-top: 3px solid var(--solo); }
+
+    /* --- 4. TABLES (Minimalist) --- */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 16px;
+      font-size: 8.5pt;
+    }
+    th {
+      font-weight: 600;
+      text-align: left;
+      padding: 8px 10px;
+      color: var(--text-muted);
+      border-bottom: 1px solid #cbd5e1;
+      text-transform: uppercase;
+      font-size: 7.5pt;
+      letter-spacing: 0.02em;
+    }
+    td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-main);
+      vertical-align: top;
+    }
+    tr:nth-child(even) td { background-color: #fcfcfd; }
+
+    /* KV Table for Patrol Info */
+    .kv-table td { padding: 4px 0; border: none; background: transparent !important; }
+    .kv-table td:first-child { width: 140px; color: var(--text-muted); font-weight: 500; }
+    .kv-table td:last-child { font-weight: 600; color: #0f172a; }
+
+    /* --- 5. PATROL & EVENT BLOCKS --- */
+    .patrol-block {
+      margin-bottom: 32px;
+      padding-bottom: 16px;
+      border-bottom: 1px dashed var(--border-color);
+    }
+    
+    .patrol-header {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    
+    .patrol-id {
+      font-family: monospace;
+      font-size: 10pt;
+      font-weight: 700;
+      color: var(--accent);
+      background: var(--accent-light);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    
+    .patrol-title {
+      font-size: 13pt;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0;
+    }
+
+    .event-block {
+      margin-top: 12px;
+      padding: 10px 12px;
+      background: #f8fafc;
+      border-left: 3px solid var(--text-muted);
+      border-radius: 0 6px 6px 0;
+    }
+    .event-block.patrol-event { border-left-color: var(--accent); }
+    .event-block.solo-event { border-left-color: var(--solo); background: var(--solo-light); }
+
+    .event-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 6px;
+    }
+    .event-title { font-weight: 600; font-size: 9.5pt; color: #0f172a; }
+    .event-meta { font-size: 8pt; color: var(--text-muted); }
+    
+    .event-notes {
+      font-size: 8.5pt;
+      color: #334155;
+      margin-top: 6px;
+      padding-top: 6px;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    /* --- 6. PHOTOS & BADGES --- */
+    .photo-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .photo-card {
+      width: calc(50% - 5px);
+      box-sizing: border-box;
+    }
+    .photo-card img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+    }
+    .photo-caption {
+      font-size: 7pt;
+      color: var(--text-muted);
+      margin-top: 4px;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      font-size: 7.5pt;
+      font-weight: 600;
+      border-radius: 12px;
+      background: #e2e8f0;
+      color: #475569;
+    }
+    .status-done { background: var(--accent-light); color: var(--accent); }
+  </style>
+</head>
+<body>
+
+  <!-- Logic Parsing Site Name -->
+  <% 
+    let siteName = baseUrl;
+    let urlLower = baseUrl ? baseUrl.toLowerCase() : "";
+    if (urlLower.includes('gcbs')) {
+      siteName = "Site GCBS (Global Conservation)";
+    } else if (urlLower.includes('gcda')) {
+      siteName = "Site GCDA (Global Conservation)";
+    }
+  %>
+
+  <!-- ── 1. COVER PAGE ────────────────────────────────────────────────── -->
+  <div class="cover-container">
+    <div class="cover-brand-line"></div>
+    <h1 class="cover-title">Laporan Patroli Lapangan</h1>
+    <div class="cover-subtitle">EarthRanger Activity Report</div>
+    
+    <div class="cover-meta">
+      <div><strong>Lokasi Site</strong> : <%= siteName %></div>
+      <div><strong>Periode</strong> : <%= period %></div>
+      <div style="margin-top: 8px; font-size: 9pt; color: #64748b;">
+        Terdapat total <%= summary.totalPatrols %> patroli dan <%= summary.totalEvents %> events tercatat dalam periode ini.
+      </div>
+      <div class="confidential-badge">DOKUMEN INTERNAL YAYASAN - BUKAN UNTUK PUBLIK</div>
+    </div>
+  </div>
+
+  <div class="page-break"></div>
+
+  <!-- ── 2. RINGKASAN LAPORAN (SUMMARY) ────────────────────────────────── -->
+  <h1 class="section-title">Ringkasan Laporan</h1>
+  
+  <div class="alert-box" style="border-left-color: var(--accent);">
+    Laporan diekspor untuk periode aktivitas: <strong><%= period %></strong>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-card accent">
+      <div class="stat-number"><%= summary.totalPatrols %></div>
+      <div class="stat-label">Total Patroli</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number"><%= summary.totalEvents - summary.totalStandalone %></div>
+      <div class="stat-label">Events di dalam Patroli</div>
+    </div>
+    <div class="stat-card solo">
+      <div class="stat-number" style="color: var(--solo);"><%= summary.totalStandalone %></div>
+      <div class="stat-label">Events Mandiri (Tanpa Patroli)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number"><%= summary.totalEvents %></div>
+      <div class="stat-label">Total Keseluruhan Events</div>
+    </div>
+  </div>
+
+  <h2 class="subsection-title">Daftar Semua Patroli</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 10%;">No. Patrol</th>
+        <th style="width: 35%;">Judul Patroli</th>
+        <th style="width: 15%;">Status</th>
+        <th style="width: 20%;">Waktu Mulai</th>
+        <th style="width: 10%;">Durasi</th>
+        <th style="width: 10%;">Segmen</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (patrols.length === 0) { %>
+        <tr><td colspan="6" style="text-align:center; padding: 24px; color: #94a3b8;">Tidak ada data patrol dalam periode ini.</td></tr>
+      <% } else { %>
+        <% patrols.forEach(p => { %>
+          <tr>
+            <td style="font-family: monospace; font-weight: 600;">#<%= p.serial_number %></td>
+            <td style="font-weight: 500;"><%= p.title %></td>
+            <td>
+              <span class="status-badge <%= p.state === 'DONE' ? 'status-done' : '' %>">
+                <%= p.state %>
+              </span>
+            </td>
+            <td><%= p.start_fmt %></td>
+            <td><%= p.duration %></td>
+            <td><%= p.segments.length %></td>
+          </tr>
+        <% }); %>
+      <% } %>
+    </tbody>
+  </table>
+
+  <div class="page-break"></div>
+
+  <!-- ── 3. DETAIL PATROL ─────────────────────────────────────────────── -->
+  <h1 class="section-title">Detail Aktivitas Patroli</h1>
+
+  <% patrols.forEach((p, idx) => { %>
+    <div class="patrol-block no-break">
+      
+      <div class="patrol-header">
+        <span class="patrol-id">#<%= p.serial_number %></span>
+        <h2 class="patrol-title"><%= p.title %></h2>
+      </div>
+      
+      <!-- Info Singkat Patrol (Key-Value) -->
+      <table class="kv-table" style="margin-bottom: 16px;">
+        <tr>
+          <td>Status & Tipe</td>
+          <td>
+            <span class="status-badge <%= p.state === 'DONE' ? 'status-done' : '' %>" style="margin-right: 8px;"><%= p.state %></span> 
+            <span style="color: var(--text-muted); font-weight: 400;"><%= p.type %></span>
+          </td>
+        </tr>
+        <tr>
+          <td>Waktu Mulai</td>
+          <td><%= p.start_fmt %></td>
+        </tr>
+        <tr>
+          <td>Waktu Selesai</td>
+          <td><%= p.end_fmt %> <span style="color: var(--text-muted); font-weight: 400;">(Durasi: <%= p.duration %>)</span></td>
+        </tr>
+      </table>
+
+      <!-- Segmen Patrol -->
+      <% if (p.segments.length > 0) { %>
+        <h3 style="font-size: 9pt; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin: 16px 0 8px 0;">Segmen Petugas</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Nama Petugas</th>
+              <th>Tipe</th>
+              <th>Mulai</th>
+              <th>Selesai</th>
+              <th>Total Observasi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% p.segments.forEach(seg => { %>
+              <tr>
+                <td style="font-weight: 500;"><%= seg.leader %></td>
+                <td><%= seg.type %></td>
+                <td><%= seg.start_fmt %></td>
+                <td><%= seg.end_fmt %></td>
+                <td><%= seg.events.length %> events</td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      <% } %>
+
+      <!-- Observasi / Events dalam Patrol -->
+      <h3 style="font-size: 9pt; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin: 16px 0 8px 0;">Observasi & Kejadian</h3>
+      <% let hasEvents = false; %>
+      <% p.segments.forEach(seg => { %>
+        <% seg.events.forEach(ev => { %>
+          <% hasEvents = true; %>
+          <div class="event-block patrol-event no-break">
+            <div class="event-header">
+              <span class="event-title"><%= ev.title %></span>
+              <span class="status-badge"><%= ev.priority %></span>
+            </div>
+            
+            <div class="event-meta">
+              Waktu: <strong><%= ev.time_fmt %></strong> &bull; Pelapor: <strong><%= ev.reporter %></strong> &bull; Koordinat: <strong><%= ev.coordinates %></strong>
+            </div>
+            
+            <% if (ev.notes && ev.notes !== '-') { %>
+              <div class="event-notes">
+                <strong>Catatan:</strong> <%= ev.notes %>
+              </div>
+            <% } %>
+
+            <% if (ev.photos && ev.photos.length > 0) { %>
+              <div class="photo-grid">
+                <% ev.photos.forEach(ph => { %>
+                  <div class="photo-card">
+                    <img src="<%= ph.src %>" alt="Dokumentasi">
+                    <div class="photo-caption"><%= ph.caption || 'Lampiran foto' %></div>
+                  </div>
+                <% }); %>
+              </div>
+            <% } %>
+          </div>
+        <% }); %>
+      <% }); %>
+
+      <% if (!hasEvents) { %>
+        <p style="font-style:italic; color:#94a3b8; font-size: 9pt;">Tidak ada observasi/kejadian yang tercatat pada patroli ini.</p>
+      <% } %>
+      
+    </div>
+  <% }); %>
+
+  <!-- ── 4. STANDALONE EVENTS (JIKA ADA) ──────────────────────────────── -->
+  <% if (standaloneEvents && standaloneEvents.length > 0) { %>
+    <div class="page-break"></div>
+    
+    <h1 class="section-title" style="color: var(--solo); border-bottom-color: var(--solo);">Events Mandiri (Tanpa Patroli)</h1>
+    <div class="alert-box" style="border-left-color: var(--solo); background: var(--solo-light);">
+      Terdapat <strong><%= standaloneEvents.length %> event(s)</strong> yang dicatat pada rentang waktu ini tanpa terikat pada sesi patroli spesifik.
+    </div>
+
+    <% standaloneEvents.forEach((ev, i) => { %>
+      <div class="event-block solo-event no-break" style="margin-bottom: 16px;">
+        <div class="event-header">
+          <span class="event-title">#<%= i + 1 %> &mdash; <%= ev.title %></span>
+          <span class="status-badge"><%= ev.state %></span>
+        </div>
+        
+        <div class="event-meta">
+          Waktu: <strong><%= ev.time_fmt %></strong> &bull; Pelapor: <strong><%= ev.reporter %></strong> &bull; Koordinat: <strong><%= ev.coordinates %></strong>
+        </div>
+        
+        <% if (ev.notes && ev.notes !== '-') { %>
+          <div class="event-notes">
+            <strong>Catatan:</strong> <%= ev.notes %>
+          </div>
+        <% } %>
+
+        <% if (ev.photos && ev.photos.length > 0) { %>
+          <div class="photo-grid">
+            <% ev.photos.forEach(ph => { %>
+              <div class="photo-card">
+                <img src="<%= ph.src %>" alt="Dokumentasi Mandiri">
+                <div class="photo-caption"><%= ph.caption || 'Lampiran foto' %></div>
+              </div>
+            <% }); %>
+          </div>
+        <% } %>
+      </div>
+    <% }); %>
+  <% } %>
+
+</body>
+</html>

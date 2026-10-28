@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <title>Laporan Aktivitas Patroli</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 18mm 18mm 20mm 18mm;
+
+      /* Footer: periode + nomor halaman (Chromium 131+; diabaikan engine yang tidak mendukung) */
+      @bottom-left {
+        content: "<%= period %>";
+        font-family: "Inter", Arial, Helvetica, sans-serif;
+        font-size: 7.5pt;
+        color: #66716A;
+      }
+      @bottom-right {
+        content: counter(page) " / " counter(pages);
+        font-family: "Inter", Arial, Helvetica, sans-serif;
+        font-size: 7.5pt;
+        color: #66716A;
+      }
+    }
+
+    :root {
+      --text: #202923;
+      --text-muted: #66716A;
+      --accent: #356B4B;
+      --line: #DFE5DF;
+      --line-strong: #B9C3BB;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: "Inter", Arial, Helvetica, sans-serif;
+      color: var(--text);
+      margin: 0;
+      padding: 0;
+      font-size: 9.5pt;
+      line-height: 1.45;
+      background: #ffffff;
+    }
+
+    /* ── Header laporan ─────────────────────────────── */
+    .report-header {
+      padding-bottom: 10pt;
+      margin-bottom: 14pt;
+      border-bottom: 1px solid var(--line-strong);
+    }
+    .report-title {
+      font-size: 22pt;
+      font-weight: 700;
+      line-height: 1.15;
+      margin: 0 0 8pt 0;
+      color: var(--text);
+    }
+    .report-meta { margin: 0; border-collapse: collapse; width: auto; font-size: 9.5pt; }
+    .report-meta td { padding: 1pt 14pt 1pt 0; border: none; }
+    .report-meta td:first-child { color: var(--text-muted); }
+
+    /* ── Judul bagian ───────────────────────────────── */
+    h2.section-title {
+      font-size: 14pt;
+      font-weight: 700;
+      margin: 18pt 0 8pt 0;
+      color: var(--text);
+      break-after: avoid;
+    }
+    h2.section-title:first-child { margin-top: 0; }
+    h3.sub-title {
+      font-size: 10pt;
+      font-weight: 600;
+      margin: 12pt 0 4pt 0;
+      color: var(--accent);
+      break-after: avoid;
+    }
+
+    /* ── Ringkasan ──────────────────────────────────── */
+    .summary { display: flex; gap: 28pt; margin: 0 0 6pt 0; }
+    .summary-item { display: flex; flex-direction: column; }
+    .summary-value { font-size: 14pt; font-weight: 600; line-height: 1.2; }
+    .summary-label { font-size: 8.5pt; color: var(--text-muted); }
+
+    /* ── Tabel ──────────────────────────────────────── */
+    table { width: 100%; border-collapse: collapse; font-size: 8.5pt; }
+    thead { display: table-header-group; }
+    tr { break-inside: avoid; }
+    th {
+      font-weight: 600;
+      text-align: left;
+      padding: 4pt 6pt;
+      color: var(--text-muted);
+      font-size: 8.5pt;
+      border-bottom: 1px solid var(--line-strong);
+    }
+    td {
+      padding: 4pt 6pt;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+      overflow-wrap: anywhere;
+    }
+    th:first-child, td:first-child { padding-left: 0; }
+    th:last-child, td:last-child { padding-right: 0; }
+    .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .nowrap { white-space: nowrap; }
+    .col-id { width: 9%; }
+    .col-status { width: 12%; }
+    .col-time { width: 22%; }
+    .col-dur { width: 12%; }
+    .col-count { width: 11%; }
+    .empty-row td { text-align: center; color: var(--text-muted); padding: 16pt 0; }
+
+    /* ── Detail patroli ─────────────────────────────── */
+    .patrol { margin-top: 18pt; padding-top: 12pt; border-top: 1px solid var(--line-strong); }
+    .patrol:first-of-type { margin-top: 8pt; }
+    .patrol-title {
+      font-size: 11.5pt;
+      font-weight: 700;
+      margin: 0 0 6pt 0;
+      break-after: avoid;
+      overflow-wrap: anywhere;
+    }
+    .patrol-id { color: var(--accent); margin-right: 4pt; }
+
+    .patrol-head { break-inside: avoid; break-after: avoid; }
+    .meta-table { width: auto; margin-bottom: 4pt; break-inside: avoid; }
+    .meta-table td { border: none; padding: 1pt 14pt 1pt 0; }
+    .meta-table td:first-child { color: var(--text-muted); white-space: nowrap; }
+
+    /* ── Observasi ──────────────────────────────────── */
+    .entry {
+      padding: 7pt 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .entry:last-child { border-bottom: none; }
+    .entry-title { font-weight: 600; font-size: 9.5pt; margin: 0; break-after: avoid; overflow-wrap: anywhere; }
+    .entry-flag { font-weight: 400; color: var(--text-muted); font-size: 8.5pt; }
+    .entry-meta { color: var(--text-muted); font-size: 8.5pt; margin: 1pt 0 0 0; break-after: avoid; }
+    .entry-notes { margin: 4pt 0 0 0; orphans: 3; widows: 3; font-size: 9pt; overflow-wrap: anywhere; white-space: pre-line; }
+    .muted { color: var(--text-muted); }
+
+    /* ── Foto ───────────────────────────────────────── */
+    .photo-grid { display: flex; flex-wrap: wrap; gap: 8pt; margin-top: 6pt; }
+    .photo {
+      width: calc(50% - 4pt);
+      margin: 0;
+      break-inside: avoid;
+    }
+    .photo img {
+      display: block;
+      width: 100%;
+      height: 150pt;
+      object-fit: contain;
+      background: #F3F5F3;
+    }
+    .photo figcaption {
+      font-size: 8pt;
+      color: var(--text-muted);
+      margin-top: 2pt;
+      overflow-wrap: anywhere;
+    }
+  </style>
+</head>
+<body>
+
+  <%
+    let siteName = baseUrl;
+    let urlLower = baseUrl ? baseUrl.toLowerCase() : "";
+    if (urlLower.includes('gcbs')) {
+      siteName = "Site GCBS (Global Conservation)";
+    } else if (urlLower.includes('gcda')) {
+      siteName = "Site GCDA (Global Conservation)";
+    }
+  %>
+
+  <!-- Header laporan -->
+  <header class="report-header">
+    <h1 class="report-title">Laporan Aktivitas Patroli</h1>
+    <table class="report-meta">
+      <tr><td>Lokasi</td><td><%= siteName %></td></tr>
+      <tr><td>Periode</td><td><%= period %></td></tr>
+    </table>
+  </header>
+
+  <!-- Ringkasan -->
+  <h2 class="section-title">Ringkasan Aktivitas</h2>
+  <div class="summary">
+    <div class="summary-item">
+      <span class="summary-value"><%= summary.totalPatrols %></span>
+      <span class="summary-label">Total patroli</span>
+    </div>
+    <div class="summary-item">
+      <span class="summary-value"><%= summary.totalEvents %></span>
+      <span class="summary-label">Total kejadian</span>
+    </div>
+    <% if (summary.totalStandalone > 0) { %>
+      <div class="summary-item">
+        <span class="summary-value"><%= summary.totalStandalone %></span>
+        <span class="summary-label">Catatan di luar sesi patroli</span>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- Daftar patroli -->
+  <h2 class="section-title">Daftar Patroli</h2>
+  <table>
+    <thead>
+      <tr>
+        <th class="col-id">No.</th>
+        <th>Judul</th>
+        <th class="col-status">Status</th>
+        <th class="col-time">Waktu mulai</th>
+        <th class="col-dur">Durasi</th>
+        <th class="col-count num">Segmen</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (patrols.length === 0) { %>
+        <tr class="empty-row"><td colspan="6">Tidak ada data patroli dalam periode ini.</td></tr>
+      <% } else { %>
+        <% patrols.forEach(p => { %>
+          <tr>
+            <td class="nowrap">#<%= p.serial_number %></td>
+            <td><%= p.title %></td>
+            <td><%= p.state %></td>
+            <td class="nowrap"><%= p.start_fmt %></td>
+            <td class="nowrap"><%= p.duration %></td>
+            <td class="num"><%= p.segments.length %></td>
+          </tr>
+        <% }); %>
+      <% } %>
+    </tbody>
+  </table>
+
+  <!-- Detail patroli -->
+  <% if (patrols.length > 0) { %>
+    <h2 class="section-title">Detail Patroli</h2>
+
+    <% patrols.forEach(p => { %>
+      <section class="patrol">
+        <div class="patrol-head">
+        <h3 class="patrol-title"><span class="patrol-id">#<%= p.serial_number %></span><%= p.title %></h3>
+
+        <table class="meta-table">
+          <tr><td>Status</td><td><%= p.state %> &middot; <%= p.type %></td></tr>
+          <tr><td>Waktu mulai</td><td><%= p.start_fmt %></td></tr>
+          <tr><td>Waktu selesai</td><td><%= p.end_fmt %></td></tr>
+          <tr><td>Durasi</td><td><%= p.duration %></td></tr>
+        </table>
+        </div>
+
+        <% if (p.segments.length > 0) { %>
+          <h3 class="sub-title">Segmen Patroli</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Petugas</th>
+                <th>Tipe</th>
+                <th>Waktu mulai</th>
+                <th>Waktu selesai</th>
+                <th class="num">Jumlah observasi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% p.segments.forEach(seg => { %>
+                <tr>
+                  <td><%= seg.leader %></td>
+                  <td><%= seg.type %></td>
+                  <td class="nowrap"><%= seg.start_fmt %></td>
+                  <td class="nowrap"><%= seg.end_fmt %></td>
+                  <td class="num"><%= seg.events.length %></td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        <% } %>
+
+        <h3 class="sub-title">Observasi dan Kejadian</h3>
+        <% let hasEvents = false; %>
+        <% p.segments.forEach(seg => { %>
+          <% seg.events.forEach(ev => { %>
+            <% hasEvents = true; %>
+            <article class="entry">
+              <p class="entry-title"><%= ev.title %><% if (ev.priority) { %> <span class="entry-flag">&middot; <%= ev.priority %></span><% } %></p>
+              <p class="entry-meta"><%= ev.time_fmt %> &middot; Pelapor: <%= ev.reporter %> &middot; Koordinat: <%= ev.coordinates %></p>
+
+              <% if (ev.notes && ev.notes !== '-') { %>
+                <p class="entry-notes"><%= ev.notes %></p>
+              <% } %>
+
+              <% if (ev.photos && ev.photos.length > 0) { %>
+                <div class="photo-grid">
+                  <% ev.photos.forEach(ph => { %>
+                    <figure class="photo">
+                      <img src="<%= ph.src %>" alt="Dokumentasi">
+                      <figcaption><%= ph.caption || 'Lampiran foto' %></figcaption>
+                    </figure>
+                  <% }); %>
+                </div>
+              <% } %>
+            </article>
+          <% }); %>
+        <% }); %>
+
+        <% if (!hasEvents) { %>
+          <p class="muted">Tidak ada observasi atau kejadian yang tercatat pada patroli ini.</p>
+        <% } %>
+      </section>
+    <% }); %>
+  <% } %>
+
+  <!-- Catatan di luar sesi patroli -->
+  <% if (standaloneEvents && standaloneEvents.length > 0) { %>
+    <h2 class="section-title" style="margin-top: 22pt;">Catatan di Luar Sesi Patroli</h2>
+
+    <% standaloneEvents.forEach((ev, i) => { %>
+      <article class="entry">
+        <p class="entry-title"><%= i + 1 %>. <%= ev.title %><% if (ev.state) { %> <span class="entry-flag">&middot; <%= ev.state %></span><% } %></p>
+        <p class="entry-meta"><%= ev.time_fmt %> &middot; Pelapor: <%= ev.reporter %> &middot; Koordinat: <%= ev.coordinates %></p>
+
+        <% if (ev.notes && ev.notes !== '-') { %>
+          <p class="entry-notes"><%= ev.notes %></p>
+        <% } %>
+
+        <% if (ev.photos && ev.photos.length > 0) { %>
+          <div class="photo-grid">
+            <% ev.photos.forEach(ph => { %>
+              <figure class="photo">
+                <img src="<%= ph.src %>" alt="Dokumentasi">
+                <figcaption><%= ph.caption || 'Lampiran foto' %></figcaption>
+              </figure>
+            <% }); %>
+          </div>
+        <% } %>
+      </article>
+    <% }); %>
+  <% } %>
+
+</body>
+</html>

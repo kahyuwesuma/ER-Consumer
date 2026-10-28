@@ -1,0 +1,58 @@
+/* Custom CSS untuk Web Dashboard & Login Interface */
+:root {
+  --color-dark: #0D3B2E;
+  --color-mid: #1A6B45;
+  --color-light: #C8E6D4;
+  --color-xlight: #F2FAF5;
+  --color-accent: #27AE60;
+  --color-solo: #6C3483;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: #f3f4f6;
+  color: #1f2937;
+}
+
+/* Custom Card & Elevation */
+.card-shadow {
+  box-shadow: 0 10px 25px -5px rgba(13, 59, 46, 0.1), 0 8px 10px -6px rgba(13, 59, 46, 0.05);
+}
+
+/* Custom Checkbox Toggle */
+.toggle-checkbox:checked {
+  background-color: var(--color-mid);
+  border-color: var(--color-mid);
+}
+
+/* Badge System */
+.badge-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.badge-done { background-color: #dcfce7; color: #15803d; }
+.badge-active { background-color: #dbeafe; color: #1e40af; }
+.badge-cancel { background-color: #fee2e2; color: #b91c1c; }
+.badge-solo { background-color: #f3e8ff; color: #6b21a8; }
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-light);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-mid);
+}

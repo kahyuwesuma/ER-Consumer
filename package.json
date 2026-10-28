@@ -1,0 +1,21 @@
+{
+  "name": "earthranger-web-report",
+  "version": "6.0.0",
+  "description": "EarthRanger Web Report Generator MVC",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon -e js,ejs,html,css app.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.8",
+    "cookie-parser": "^1.4.6",
+    "dayjs": "^1.11.10",
+    "ejs": "^3.1.9",
+    "express": "^4.19.2",
+    "puppeteer": "^22.6.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}

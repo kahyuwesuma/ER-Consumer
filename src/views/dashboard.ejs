@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EarthRanger — Ekspor Laporan Patrol</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper:        #F6F4EE;
+    --paper-2:      #EFEBE1;
+    --ink:          #14181A;
+    --ink-2:        #2C3134;
+    --muted:        #6B6F73;
+    --muted-2:      #9CA0A4;
+    --rule:         #D8D2C4;
+    --rule-2:       #C7C0AF;
+    --accent:       #1B4332;
+    --accent-2:     #2D6A4F;
+    --accent-soft:  #E7EEE6;
+    --danger:       #9B2C2C;
+    --danger-soft:  #F5E4E1;
+    --r-sm: 4px;
+    --r-md: 6px;
+    --r-lg: 8px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; border: none; outline: none; }
+
+  html, body { height: 100%; }
+  body {
+    height: 100dvh;
+    overflow: hidden;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 13.5px;
+    line-height: 1.45;
+    font-feature-settings: "ss01", "cv11", "tnum";
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Subtle paper grain — not a gradient, not a blob */
+  body::before {
+    content: "";
+    position: fixed; inset: 0;
+    background-image:
+      radial-gradient(rgba(20,24,26,0.022) 1px, transparent 1px);
+    background-size: 3px 3px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .layout {
+    width: 100%;
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 22px 40px 18px;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+    z-index: 1;
+  }
+  .top-bar, .masthead { margin-bottom: 22px; }
+
+  /* ---- Top bar: tight, editorial, no floating pills ---- */
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--rule);
+    flex-shrink: 0;
+  }
+
+  .brand {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-family: 'Newsreader', Georgia, serif;
+    font-weight: 500;
+    font-size: 17px;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+  }
+  .brand .mark {
+    display: inline-block;
+    width: 7px; height: 7px;
+    background: var(--accent);
+    border-radius: 50%;
+    transform: translateY(-2px);
+  }
+  .brand small {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .site-meta {
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+  .meta-item {
+    font-size: 12px;
+    color: var(--muted);
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .meta-item + .meta-item { border-left: 1px solid var(--rule); }
+  .meta-item .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted-2);
+  }
+  .meta-item .value { color: var(--ink); font-weight: 500; }
+  .user-name { font-weight: 600; }
+
+  .logout {
+    color: var(--ink);
+    text-decoration: none;
+    font-size: 12.5px;
+    font-weight: 500;
+    padding: 0 14px;
+    border-left: 1px solid var(--rule);
+    transition: color .15s ease;
+  }
+  .logout:hover { color: var(--danger); }
+
+  /* ---- Masthead / title block ---- */
+  .masthead {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 20px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--rule);
+    flex-shrink: 0;
+  }
+  .masthead .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent-2);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .masthead .eyebrow::before {
+    content: "";
+    display: inline-block;
+    width: 18px; height: 1px;
+    background: var(--accent-2);
+  }
+  .masthead h1 {
+    font-family: 'Newsreader', Georgia, serif;
+    font-size: clamp(26px, 3.4vw, 34px);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.08;
+    color: var(--ink);
+  }
+  .masthead h1 em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--accent);
+  }
+  .masthead .subtitle {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 8px;
+    max-width: 52ch;
+    line-height: 1.5;
+  }
+  .masthead .ref {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted-2);
+    text-align: right;
+    line-height: 1.5;
+    letter-spacing: 0.04em;
+  }
+  .masthead .ref strong { color: var(--ink); font-weight: 500; }
+
+  /* ---- Form ---- */
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    flex: 1;
+    min-height: 0;
+    justify-content: space-between;
+    padding-bottom: 4px;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 5fr 4fr;
+    gap: 0;
+    align-content: start;
+  }
+
+  /* Section dividers using borders, not boxes */
+  fieldset {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 0 32px 0 0;
+    position: relative;
+    height: 100%;
+  }
+  fieldset + fieldset {
+    padding: 0 0 0 32px;
+    border-left: 1px solid var(--rule);
+  }
+  /* Distribute fieldset content vertically to fill available height */
+  fieldset > *:last-child { margin-top: auto; }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-label .num {
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .section-label::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--rule);
+  }
+
+  /* Field rows */
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .field-group { display: flex; flex-direction: column; gap: 6px; }
+  label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-2);
+    letter-spacing: 0.01em;
+  }
+  label .req { color: var(--accent-2); margin-left: 2px; }
+
+  input[type="date"], input[type="number"] {
+    width: 100%;
+    height: 40px;
+    padding: 0 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--ink);
+    background: transparent;
+    border: 1px solid var(--rule-2);
+    border-radius: var(--r-sm);
+    transition: border-color .15s ease, background .15s ease, box-shadow .15s ease;
+    font-variant-numeric: tabular-nums;
+  }
+  input[type="date"] { font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+  input[type="number"] { font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+  input:hover:not(:disabled) { border-color: var(--muted-2); }
+  input:focus-visible {
+    border-color: var(--accent);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(27,67,50,0.08);
+  }
+  input:disabled {
+    color: var(--muted-2);
+    background: var(--paper-2);
+    border-color: var(--rule);
+    cursor: not-allowed;
+  }
+  ::-webkit-calendar-picker-indicator {
+    opacity: 0.5;
+    cursor: pointer;
+    filter: invert(15%);
+  }
+  ::-webkit-calendar-picker-indicator:hover { opacity: 1; }
+
+  .hint {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.4;
+    padding-left: 1px;
+  }
+
+  /* Preset chips — flat, monospace, no float */
+  .presets {
+    display: flex;
+    gap: 0;
+    margin-top: 2px;
+    border: 1px solid var(--rule-2);
+    border-radius: var(--r-sm);
+    overflow: hidden;
+    width: fit-content;
+  }
+  .preset-btn {
+    background: transparent;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-2);
+    cursor: pointer;
+    padding: 8px 14px;
+    border-right: 1px solid var(--rule-2);
+    transition: background .12s ease, color .12s ease;
+    letter-spacing: 0.01em;
+  }
+  .preset-btn:last-child { border-right: none; }
+  .preset-btn:hover { background: var(--accent-soft); color: var(--accent); }
+  .preset-btn:active { background: var(--accent); color: #fff; }
+
+  /* Checkbox — square, inked, not pill */
+  .checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border-top: 1px solid var(--rule);
+  }
+  .checkbox-opt {
+    display: grid;
+    grid-template-columns: 20px 1fr;
+    gap: 14px;
+    padding: 14px 0;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid var(--rule);
+    align-items: start;
+    transition: padding-left .15s ease;
+  }
+  .checkbox-opt:hover { padding-left: 4px; }
+  .checkbox-opt input { position: absolute; opacity: 0; pointer-events: none; }
+
+  .checkbox-box {
+    width: 18px; height: 18px;
+    border: 1.5px solid var(--rule-2);
+    border-radius: 2px;
+    background: transparent;
+    flex-shrink: 0;
+    margin-top: 2px;
+    transition: all .15s ease;
+    position: relative;
+  }
+  .checkbox-opt:hover .checkbox-box { border-color: var(--accent-2); }
+  .checkbox-opt input:checked + .checkbox-box {
+    background: var(--ink);
+    border-color: var(--ink);
+  }
+  .checkbox-opt input:checked + .checkbox-box::after {
+    content: "";
+    position: absolute;
+    left: 4px; top: 1px;
+    width: 5px; height: 10px;
+    border: solid #fff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+  .checkbox-opt input:focus-visible + .checkbox-box {
+    box-shadow: 0 0 0 3px rgba(27,67,50,0.12);
+  }
+
+  .checkbox-text { display: flex; flex-direction: column; gap: 3px; }
+  .checkbox-text .title {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.005em;
+  }
+  .checkbox-text .desc {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* ---- Actions footer ---- */
+  .actions-block {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 24px;
+    align-items: end;
+    padding-top: 22px;
+    margin-top: 24px;
+    border-top: 1px solid var(--rule);
+    flex-shrink: 0;
+  }
+
+  .actions {
+    display: flex;
+    gap: 0;
+    align-self: end;
+  }
+
+  .btn {
+    height: 44px;
+    padding: 0 22px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: all .15s ease;
+    border-radius: 0;
+  }
+  .btn:first-child { border-radius: var(--r-sm) 0 0 var(--r-sm); }
+  .btn:last-child { border-radius: 0 var(--r-sm) var(--r-sm) 0; }
+  .btn:only-child { border-radius: var(--r-sm); }
+  .btn:active:not(:disabled) { transform: translateY(1px); }
+  .btn:disabled { opacity: 0.5; cursor: wait; }
+
+  .btn-primary {
+    background: var(--ink);
+    color: #fff;
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: var(--accent);
+  }
+  .btn-secondary {
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--rule-2);
+    border-left: none;
+  }
+  .btn-secondary:hover:not(:disabled) {
+    background: var(--paper-2);
+    border-color: var(--ink);
+  }
+
+  .btn .icon {
+    width: 14px; height: 14px;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    fill: none;
+  }
+
+  /* ---- Status ---- */
+  .status-container {
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 0;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: opacity .2s ease, max-height .25s ease, padding .2s ease;
+  }
+  .status-container.active {
+    opacity: 1;
+    max-height: 80px;
+    padding-top: 10px;
+  }
+
+  .track {
+    height: 2px;
+    background: var(--rule);
+    position: relative;
+    overflow: hidden;
+  }
+  .fill {
+    height: 100%;
+    width: 0%;
+    background: var(--ink);
+    transition: width .4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .fill::after {
+    content: "";
+    position: absolute;
+    right: 0; top: 0;
+    width: 30px; height: 100%;
+    background: linear-gradient(90deg, transparent, var(--paper));
+    opacity: 0;
+  }
+
+  #label {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--ink-2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-variant-numeric: tabular-nums;
+  }
+  #label .pct {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--muted);
+    font-weight: 500;
+    font-size: 11.5px;
+  }
+  #label.error { color: var(--danger); }
+  #label a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    text-decoration-thickness: 1px;
+    font-weight: 500;
+  }
+
+  /* ---- Footnote ---- */
+  .footnote {
+    margin-top: 0;
+    padding-top: 12px;
+    border-top: 1px solid var(--rule);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted-2);
+    letter-spacing: 0.06em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+  .footnote .dot {
+    display: inline-block;
+    width: 5px; height: 5px;
+    background: var(--accent-2);
+    border-radius: 50%;
+    margin-right: 8px;
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+
+  @media (max-height: 760px) {
+    .layout { padding: 16px 32px 14px; }
+    .top-bar, .masthead { margin-bottom: 16px; }
+    .masthead h1 { font-size: 24px; }
+    fieldset { gap: 14px; }
+    .checkbox-opt { padding: 10px 0; }
+    .actions-block { padding-top: 14px; margin-top: 16px; }
+  }
+  @media (max-height: 640px) {
+    .masthead .subtitle { display: none; }
+    .masthead .ref { display: none; }
+    .footnote { display: none; }
+    .checkbox-text .desc { display: none; }
+    .checkbox-opt { padding: 8px 0; }
+    fieldset { gap: 12px; }
+  }
+
+  /* ---- Responsive ---- */
+  @media (max-width: 760px) {
+    body { overflow: auto; height: auto; min-height: 100dvh; }
+    .layout { padding: 16px 16px 28px; }
+    .top-bar, .masthead { margin-bottom: 18px; }
+    .top-bar { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .site-meta { flex-wrap: wrap; }
+    .meta-item:first-child { padding-left: 0; }
+    .masthead { grid-template-columns: 1fr; }
+    .masthead .ref { text-align: left; }
+    .form-grid { grid-template-columns: 1fr; }
+    fieldset { padding: 0 !important; border-left: none !important; height: auto; }
+    fieldset + fieldset { padding-top: 24px !important; border-top: 1px solid var(--rule) !important; margin-top: 16px; }
+    fieldset > *:last-child { margin-top: 0; }
+    .actions-block { grid-template-columns: 1fr; gap: 16px; padding-top: 18px; margin-top: 18px; }
+    .actions { flex-direction: column; }
+    .btn { border-radius: var(--r-sm) !important; width: 100%; justify-content: center; }
+    .btn-secondary { border-left: 1px solid var(--rule-2); border-top: none; margin-top: 8px; }
+    .footnote { flex-direction: column; align-items: flex-start; gap: 6px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- ============ TOP BAR ============ -->
+  <nav class="top-bar">
+    <div class="brand">
+      <span class="mark"></span>
+      EarthRanger
+      <small>Report Console</small>
+    </div>
+    <div class="site-meta">
+      <div class="meta-item">
+        <span class="label">User</span>
+        <span class="value user-name"><%= typeof username !== 'undefined' ? username : 'Admin' %></span>
+      </div>
+      <div class="meta-item" title="<%= baseUrl %>">
+        <span class="label">Site</span>
+        <span class="value"><%= baseUrl.replace(/^https?:\/\//, '').split('.')[0].toUpperCase() %></span>
+      </div>
+      <a href="/logout" class="logout">Keluar →</a>
+    </div>
+  </nav>
+
+  <!-- ============ MASTHEAD ============ -->
+  <header class="masthead">
+    <div>
+      <div class="eyebrow">Patrol Export · v2</div>
+      <h1>Ekspor Laporan <em>Patrol</em></h1>
+      <p class="subtitle">Tentukan periode dan opsi data untuk menghasilkan dokumen laporan patroli sesuai dengan site</p>
+    </div>
+    <div class="ref">
+      <strong>FORMAT</strong><br>
+      PDF · CSV<br>
+      <span style="color:var(--muted-2)">— · —</span><br>
+      <strong>OUTPUT</strong><br>
+      A4 · Portrait
+    </div>
+  </header>
+
+  <!-- ============ FORM ============ -->
+  <form id="reportForm" novalidate>
+
+    <div class="form-grid">
+
+      <!-- LEFT COLUMN -->
+      <fieldset>
+        <div class="section-label"><span class="num">01</span> Filter Waktu</div>
+
+        <div class="field-row">
+          <div class="field-group">
+            <label for="since">Tanggal Mulai</label>
+            <input type="date" name="since" id="since">
+          </div>
+          <div class="field-group">
+            <label for="until">Tanggal Selesai</label>
+            <input type="date" name="until" id="until">
+          </div>
+        </div>
+
+        <div class="presets" role="group" aria-label="Pilih rentang cepat">
+          <button type="button" class="preset-btn" data-preset="today">Hari ini</button>
+          <button type="button" class="preset-btn" data-preset="week">7 Hari</button>
+          <button type="button" class="preset-btn" data-preset="month">Bulan ini</button>
+          <button type="button" class="preset-btn" data-preset="clear">Reset</button>
+        </div>
+
+        <div class="field-group">
+          <label for="limit">Batas Maksimal Patrol</label>
+          <input type="number" name="limit" id="limit" value="50" min="1" max="500">
+          <span class="hint" id="limitHint">Berlaku jika filter tanggal dikosongkan.</span>
+        </div>
+      </fieldset>
+
+      <!-- RIGHT COLUMN -->
+      <fieldset>
+        <div class="section-label"><span class="num">02</span> Pengaturan Konten</div>
+
+        <div class="checkbox-group">
+          <label class="checkbox-opt">
+            <input type="checkbox" name="includePhotos" checked>
+            <span class="checkbox-box"></span>
+            <span class="checkbox-text">
+              <span class="title">Sertakan Foto Lampiran</span>
+              <span class="desc">Berkas laporan akan berukuran lebih besar karena menyertakan gambar.</span>
+            </span>
+          </label>
+
+          <label class="checkbox-opt">
+            <input type="checkbox" name="includeStandalone" checked>
+            <span class="checkbox-box"></span>
+            <span class="checkbox-text">
+              <span class="title">Sertakan Event Mandiri</span>
+              <span class="desc">Event yang tidak terikat pada patroli tertentu juga diekspor.</span>
+            </span>
+          </label>
+
+          <label class="checkbox-opt">
+            <input type="checkbox" name="hideEmptySegs">
+            <span class="checkbox-box"></span>
+            <span class="checkbox-text">
+              <span class="title">Abaikan Segmen Kosong</span>
+              <span class="desc">Sembunyikan segmen rute tanpa temuan event apa pun.</span>
+            </span>
+          </label>
+        </div>
+      </fieldset>
+
+    </div>
+
+    <!-- ============ ACTIONS ============ -->
+    <div class="actions-block">
+
+      <div class="status-container" id="statusBox" aria-live="polite">
+        <div class="track"><div class="fill" id="bar"></div></div>
+        <div id="label"></div>
+      </div>
+
+      <div class="actions">
+        <button type="submit" value="pdf" class="btn btn-primary">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
+          Unduh PDF
+        </button>
+        <button type="submit" value="csv" class="btn btn-secondary">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M14 3v5h5M14 3H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V8l-6-5z M8 13h8 M8 17h8 M8 9h2"/></svg>
+          Ekspor CSV
+        </button>
+      </div>
+
+    </div>
+
+  </form>
+
+  <!-- ============ FOOTNOTE ============ -->
+  <div class="footnote">
+    <span><span class="dot"></span>Connected · EarthRanger API</span>
+    <span>Build 2.0.0 · <%= new Date().getFullYear() %></span>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const form = $('reportForm'), since = $('since'), until = $('until'), limit = $('limit');
+  const bar = $('bar'), label = $('label'), hint = $('limitHint'), statusBox = $('statusBox');
+  const buttons = form.querySelectorAll('button[type="submit"]');
+
+  const setBusy = (b) => {
+    buttons.forEach((x) => (x.disabled = b));
+    form.querySelectorAll('.preset-btn, input').forEach(el => el.disabled = b);
+  };
+
+  const setStatus = (text, { pct = null, error = false } = {}) => {
+    statusBox.classList.add('active');
+    label.className = error ? 'error' : '';
+    label.innerHTML = '';
+    if (pct !== null) {
+      const pctEl = document.createElement('span');
+      pctEl.className = 'pct';
+      pctEl.textContent = String(pct).padStart(3, '0') + '%';
+      label.appendChild(pctEl);
+      bar.style.width = pct + '%';
+    }
+    const txt = document.createElement('span');
+    txt.textContent = text;
+    label.appendChild(txt);
+  };
+
+  const fail = (msg, field) => {
+    setStatus(msg, { error: true });
+    setBusy(false);
+    if (field) field.focus();
+  };
+
+  const iso = (d) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  const presets = {
+    today: () => [new Date(), new Date()],
+    week:  () => { const s = new Date(); s.setDate(s.getDate() - 6); return [s, new Date()]; },
+    month: () => { const n = new Date(); return [new Date(n.getFullYear(), n.getMonth(), 1), n]; },
+    clear: () => [null, null],
+  };
+
+  document.querySelectorAll('[data-preset]').forEach((b) =>
+    b.addEventListener('click', () => {
+      const [s, e] = presets[b.dataset.preset]();
+      since.value = s ? iso(s) : '';
+      until.value = e ? iso(e) : '';
+      syncLimit();
+    })
+  );
+
+  function syncLimit() {
+    const hasDate = !!since.value;
+    limit.disabled = hasDate;
+    hint.textContent = hasDate ? 'Nonaktif: rentang tanggal aktif.' : 'Berlaku jika filter tanggal dikosongkan.';
+  }
+  since.addEventListener('input', syncLimit);
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (until.value && !since.value) return fail('Pilih tanggal mulai terlebih dahulu.', since);
+    if (since.value && until.value && since.value > until.value) return fail('Tanggal selesai tidak valid.', until);
+
+    const data = new URLSearchParams(new FormData(form));
+    data.set('format', (e.submitter && e.submitter.value) || 'pdf');
+
+    setBusy(true);
+    setStatus('Memulai proses...', { pct: 0 });
+
+    let jobId;
+    try {
+      const res = await fetch('/report/start', { method: 'POST', body: data });
+      if (res.status === 401) { window.location = '/login'; return; }
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      jobId = (await res.json()).jobId;
+    } catch (err) { return fail('Gagal memulai proses: ' + err.message); }
+
+    const es = new EventSource('/report/progress/' + jobId);
+    es.onmessage = (ev) => {
+      const s = JSON.parse(ev.data);
+      setStatus(s.message, { pct: s.percent });
+
+      if (s.status === 'done') {
+        es.close(); setBusy(false);
+        const url = '/report/download/' + jobId;
+        label.innerHTML = '';
+        const done = document.createElement('span');
+        done.textContent = 'Laporan berhasil dibuat.';
+        label.appendChild(done);
+        const a = document.createElement('a');
+        a.href = url;
+        a.textContent = 'Unduh ulang';
+        label.appendChild(a);
+        window.location = url;
+      } else if (s.status === 'error') {
+        es.close(); fail('Gagal: ' + s.error);
+      }
+    };
+    es.onerror = () => { es.close(); fail('Koneksi terputus. Silakan coba lagi.'); };
+  });
+
+  syncLimit();
+})();
+</script>
+</body>
+</html> 

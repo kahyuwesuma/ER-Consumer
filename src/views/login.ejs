@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Masuk — EarthRanger Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper:        #F6F4EE;
+    --paper-2:      #EFEBE1;
+    --ink:          #14181A;
+    --ink-2:        #2C3134;
+    --muted:        #6B6F73;
+    --muted-2:      #9CA0A4;
+    --rule:         #D8D2C4;
+    --rule-2:       #C7C0AF;
+    --accent:       #1B4332;
+    --accent-2:     #2D6A4F;
+    --accent-soft:  #E7EEE6;
+    --danger:       #9B2C2C;
+    --danger-soft:  #F5E4E1;
+    --r-sm: 4px;
+    --r-md: 6px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; border: none; outline: none; }
+
+  html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  html, body { height: 100%; }
+  body {
+    height: 100dvh;
+    overflow: hidden;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.45;
+    font-feature-settings: "ss01", "cv11", "tnum";
+    display: flex;
+    align-items: stretch;
+  }
+
+  /* Subtle paper grain */
+  body::before {
+    content: "";
+    position: fixed; inset: 0;
+    background-image: radial-gradient(rgba(20,24,26,0.022) 1px, transparent 1px);
+    background-size: 3px 3px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ============ Split layout: left editorial panel, right form ============ */
+  .stage {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    min-height: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ---- LEFT: Brand / editorial panel ---- */
+  .panel-left {
+    padding: 32px 56px 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border-right: 1px solid var(--rule);
+    position: relative;
+  }
+
+  .panel-left .brand {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-family: 'Newsreader', Georgia, serif;
+    font-weight: 500;
+    font-size: 17px;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+  }
+  .panel-left .brand .mark {
+    display: inline-block;
+    width: 7px; height: 7px;
+    background: var(--accent);
+    border-radius: 50%;
+    transform: translateY(-2px);
+  }
+  .panel-left .brand small {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .panel-left .copy {
+    max-width: 38ch;
+  }
+  .panel-left .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent-2);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .panel-left .eyebrow::before {
+    content: "";
+    display: inline-block;
+    width: 22px; height: 1px;
+    background: var(--accent-2);
+  }
+  .panel-left h1 {
+    font-family: 'Newsreader', Georgia, serif;
+    font-size: clamp(28px, 3.4vw, 38px);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    color: var(--ink);
+  }
+  .panel-left h1 em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--accent);
+  }
+  .panel-left .lede {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 14px;
+    max-width: 42ch;
+    line-height: 1.55;
+  }
+
+  /* Stats row */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border-top: 1px solid var(--rule);
+    padding-top: 18px;
+  }
+  .stat {
+    padding-right: 16px;
+    border-right: 1px solid var(--rule);
+  }
+  .stat:last-child { border-right: none; padding-right: 0; }
+  .stat .num {
+    font-family: 'Newsreader', Georgia, serif;
+    font-size: 24px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    line-height: 1;
+  }
+  .stat .lbl {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 6px;
+    line-height: 1.4;
+  }
+
+  /* Footnote */
+  .panel-left .footnote {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted-2);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .panel-left .footnote .dot {
+    display: inline-block;
+    width: 5px; height: 5px;
+    background: var(--accent-2);
+    border-radius: 50%;
+    margin-right: 8px;
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+
+  /* ---- RIGHT: form ---- */
+  .panel-right {
+    padding: 32px 56px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .panel-right::before {
+    /* Tiny corner label */
+    content: "SIGN IN";
+    position: absolute;
+    top: 32px;
+    right: 56px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    color: var(--muted-2);
+  }
+
+  form {
+    width: 100%;
+    max-width: 380px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  /* Section label */
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+  .section-label .num { color: var(--ink); font-weight: 500; }
+  .section-label::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--rule);
+  }
+
+  /* Error message */
+  .error {
+    color: var(--danger);
+    font-size: 12.5px;
+    background: var(--danger-soft);
+    border-left: 2px solid var(--danger);
+    padding: 10px 14px;
+    line-height: 1.5;
+    font-weight: 500;
+  }
+  .error::before {
+    content: "⚠";
+    margin-right: 8px;
+    font-size: 11px;
+  }
+
+  /* Fields */
+  .field-group { display: flex; flex-direction: column; gap: 6px; }
+  label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-2);
+    letter-spacing: 0.01em;
+  }
+  label .req { color: var(--accent-2); margin-left: 2px; }
+
+  input, select {
+    width: 100%;
+    height: 40px;
+    padding: 0 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+    background: transparent;
+    border: 1px solid var(--rule-2);
+    border-radius: var(--r-sm);
+    transition: border-color .15s ease, background .15s ease, box-shadow .15s ease;
+    font-variant-numeric: tabular-nums;
+  }
+  select {
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none' stroke='%236B6F73' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='1 1.5 6 6.5 11 1.5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+  }
+  select option {
+    background: #fff;
+    color: var(--ink);
+  }
+  input[type="text"], input[type="password"] {
+    font-family: 'Inter', sans-serif;
+  }
+  input:hover, select:hover { border-color: var(--muted-2); }
+  input:focus-visible, select:focus-visible {
+    border-color: var(--accent);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(27,67,50,0.08);
+  }
+  input.has-toggle { padding-right: 90px; }
+
+  .control { position: relative; }
+  .toggle {
+    position: absolute;
+    right: 4px;
+    top: 4px;
+    height: 32px;
+    padding: 0 10px;
+    background: transparent;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all .15s ease;
+  }
+  .toggle:hover {
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  .toggle:active { transform: translateY(1px); }
+
+  /* Action row */
+  .actions {
+    margin-top: 8px;
+    padding-top: 18px;
+    border-top: 1px solid var(--rule);
+  }
+
+  .btn {
+    width: 100%;
+    height: 44px;
+    padding: 0 22px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 13.5px;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all .15s ease;
+    background: var(--ink);
+    color: #fff;
+    border-radius: var(--r-sm);
+  }
+  .btn:hover:not(:disabled) {
+    background: var(--accent);
+  }
+  .btn:active:not(:disabled) { transform: translateY(1px); }
+  .btn:disabled { opacity: 0.55; cursor: wait; }
+  .btn .icon {
+    width: 14px; height: 14px;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    fill: none;
+  }
+
+  /* Hint below button */
+  .hint {
+    margin-top: 12px;
+    text-align: center;
+    font-size: 11.5px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .hint a {
+    color: var(--ink-2);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    text-decoration-thickness: 1px;
+    font-weight: 500;
+  }
+  .hint a:hover { color: var(--accent); }
+
+  /* ---- Responsive ---- */
+  @media (max-width: 820px) {
+    body { overflow: auto; height: auto; min-height: 100dvh; }
+    .stage { grid-template-columns: 1fr; }
+    .panel-left {
+      padding: 22px 22px 24px;
+      border-right: none;
+      border-bottom: 1px solid var(--rule);
+    }
+    .panel-left h1 { font-size: 26px; }
+    .panel-left .lede { font-size: 12.5px; }
+    .stats { display: none; }
+    .panel-left .footnote { display: none; }
+    .panel-right { padding: 32px 22px 40px; }
+    .panel-right::before { top: 22px; right: 22px; }
+  }
+
+  @media (max-height: 640px) and (min-width: 821px) {
+    .panel-left { padding: 20px 32px 16px; }
+    .panel-right { padding: 20px 32px 16px; }
+    .panel-left h1 { font-size: 26px; }
+    .panel-left .lede { display: none; }
+    .stats { padding-top: 12px; }
+    .stat .num { font-size: 20px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+
+  <!-- ============ LEFT: editorial panel ============ -->
+  <aside class="panel-left">
+    <div class="brand">
+      <span class="mark"></span>
+      EarthRanger
+      <small>Report Console</small>
+    </div>
+
+    <div class="copy">
+      <div class="eyebrow">Patrol Export ·</div>
+      <h1>Konsol <em>Laporan</em><br>Patrol.</h1>
+      <p class="lede">Masuk dengan kredensial EarthRanger Anda</p>
+    </div>
+
+    <div class="footnote">
+      <span><span class="dot"></span>EarthRanger API Client· </span>
+    </div>
+  </aside>
+
+  <!-- ============ RIGHT: login form ============ -->
+  <main class="panel-right">
+
+    <%
+      const sites = [
+        { name: 'GCDA', url: 'https://gcda.pamdas.org' },
+        { name: 'GCBS', url: 'https://gcbs.pamdas.org' },
+      ];
+      const selected = (typeof baseUrl !== 'undefined' && baseUrl) ? baseUrl : sites[0].url;
+      const selectedName = (sites.find(s => s.url === selected) || sites[0]).name;
+
+      const messages = {
+        not_registered:  'Akun tidak terdaftar di ' + selectedName + '.',
+        bad_credentials: 'Username atau password salah untuk ' + selectedName + '. Periksa kembali.',
+        server_down:     'Tidak dapat terhubung ke server ' + selectedName + '. Coba lagi nanti.',
+        invalid_site:    'Site tidak valid.',
+      };
+      const errorText = (typeof error !== 'undefined' && error) ? (messages[error] || error) : '';
+    %>
+
+    <form action="/login" method="POST" id="loginForm" novalidate>
+
+      <div class="section-label"><span class="num">01</span> Kredensial</div>
+
+      <% if (errorText) { %>
+        <p class="error" role="alert"><%= errorText %></p>
+      <% } %>
+
+      <div class="field-group">
+        <label for="baseUrl">Site <span class="req">*</span></label>
+        <select name="baseUrl" id="baseUrl" required>
+          <% sites.forEach(function (s) { %>
+            <option value="<%= s.url %>" <%= selected === s.url ? 'selected' : '' %>><%= s.name %></option>
+          <% }); %>
+        </select>
+      </div>
+
+      <div class="field-group">
+        <label for="username">Username <span class="req">*</span></label>
+        <input type="text" name="username" id="username" required autocomplete="username" autofocus>
+      </div>
+
+      <div class="field-group">
+        <label for="password">Password <span class="req">*</span></label>
+        <span class="control">
+          <input type="password" name="password" id="password" required autocomplete="current-password" class="has-toggle">
+          <button type="button" class="toggle" id="toggle" aria-controls="password" aria-pressed="false">Tampilkan</button>
+        </span>
+      </div>
+
+      <div class="actions">
+        <button type="submit" class="btn" id="submit">
+          Masuk
+          <svg class="icon" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+        <p class="hint">Butuh akses? Hubungi <a href="#">administrator</a></p>
+      </div>
+
+    </form>
+  </main>
+
+</div>
+
+<script>
+(function () {
+  const pw = document.getElementById('password');
+  const toggle = document.getElementById('toggle');
+  toggle.addEventListener('click', () => {
+    const show = pw.type === 'password';
+    pw.type = show ? 'text' : 'password';
+    toggle.textContent = show ? 'Sembunyikan' : 'Tampilkan';
+    toggle.setAttribute('aria-pressed', show);
+  });
+
+  document.getElementById('loginForm').addEventListener('submit', () => {
+    const b = document.getElementById('submit');
+    b.disabled = true;
+    b.innerHTML = 'Memeriksa...';
+  });
+})();
+</script>
+</body>
+</html>
