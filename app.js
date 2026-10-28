@@ -21,9 +21,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Routes Setup
 app.use('/', routes);
 
-// Start Server
-app.listen(PORT, () => {
-  console.log('====================================================');
-  console.log(` EarthRanger Web Generator aktif di: http://localhost:${PORT}`);
-  console.log('====================================================');
-});
+// Export for Vercel (serverless)
+module.exports = app;
+
+// Only listen when run locally (npm start / npm run dev)
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log('====================================================');
+    console.log(` EarthRanger Web Generator aktif di: http://localhost:${PORT}`);
+    console.log('====================================================');
+  });
+}
